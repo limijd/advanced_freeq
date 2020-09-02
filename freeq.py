@@ -9,8 +9,10 @@ from collections import Counter
 
 __all__ = ['WordFinder', 'Book']
 
+SCRIPT_PATH=os.path.dirname(os.path.realpath(__file__))
+
 lemmas = {}
-with open('lemmas.txt') as fin:
+with open('%s/lemmas.txt'%SCRIPT_PATH) as fin:
     for line in fin:
         line = line.strip()
         headword = line.split('\t')[0]

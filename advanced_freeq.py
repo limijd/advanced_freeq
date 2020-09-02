@@ -24,19 +24,23 @@ Options:
     -s --mastered       Mastered vocabularies file
 """
 
+import os
+import sys
+
+SCRIPT_PATH=os.path.dirname(os.path.realpath(__file__))
+sys.path.append(SCRIPT_PATH)
+
 from docopt import docopt
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='advanced freeq 0.2')
 
-import os
 import numpy as np
 import pandas as pd
 
 if arguments['--txt'] == True:
     os.system(
-        './freeq.py -i %s -o .book_freeq.csv' %
-        arguments['<txtname>']
+        './freeq.py -i %s -o %s/.book_freeq.csv' % (SCRIPT_PATH, arguments['<txtname>'])
     )
 elif arguments['--pdf'] == True:
     from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -63,29 +67,29 @@ elif arguments['--pdf'] == True:
         device.close()
         str = retstr.getvalue()
         retstr.close()
-        with open('.book.txt', 'w') as book:
+        with open('%s/.book.txt'%SCRIPT_PATH, 'w') as book:
             book.write('%s' % str)
     convert_pdf_to_txt(arguments['<pdfname>'])
-    os.system('./freeq.py -i .book.txt -o .book_freeq.csv')
+    os.system('%s/freeq.py -i %s/.book.txt -o %s/.book_freeq.csv'%(SCRIPT_PATH, SCRIPT_PATH, SCRIPT_PATH))
 
 elif arguments['--mobi'] == True:
-    os.system('ebook-convert %s .book.txt' %arguments['<mobiname>'])
-    os.system('./freeq.py -i .book.txt -o .book_freeq.csv')
-
+    os.system('ebook-convert %s %s/.book.txt' %(arguments['<mobiname>'], SCRIPT_PATH))
+    os.system('%s/freeq.py -i %s/.book.txt -o %s/.book_freeq.csv'%(SCRIPT_PATH, SCRIPT_PATH, SCRIPT_PATH))
 else:
-    os.system('ebook-convert %s .book.txt' %arguments['<epubname>'])
-    os.system('./freeq.py -i .book.txt -o .book_freeq.csv')
+    os.system('ebook-convert %s %s/.book.txt' %(arguments['<epubname>'], SCRIPT_PATH))
+    os.system('%s/freeq.py -i %s/.book.txt -o %s/.book_freeq.csv'%(SCRIPT_PATH, SCRIPT_PATH, SCRIPT_PATH))
 
-os.system("sed -i 's/^ *//g' .book_freeq.csv")
-os.system("sed -i 's/ /,/g' .book_freeq.csv")
+os.system("sed -i 's/^ *//g' %s/.book_freeq.csv"%SCRIPT_PATH)
+os.system("sed -i 's/ /,/g' %s/.book_freeq.csv"%SCRIPT_PATH)
 
-df_book = pd.read_csv('.book_freeq.csv', names=['Freq', 'Word'])
+df_book = pd.read_csv('%s/.book_freeq.csv'%SCRIPT_PATH, names=['Freq', 'Word'])
 f = lambda x: len(str(x)) > 2
 df_book = df_book[df_book['Word'].apply(f)]
 
 if arguments['--mastered'] == False:
     df_coca = pd.read_csv(
-        'COCA_top5000.csv'
+        '%s/empty.csv'%SCRIPT_PATH
+        #'COCA_top5000.csv'
     ).loc[:,['Rank','Word']]
     df_freq = df_book[~df_book['Word'].isin(df_coca['Word'].iloc[:1000])]
     df_freq.to_csv('%s' % arguments['<output>'], index = None)
