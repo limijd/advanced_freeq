@@ -40,7 +40,7 @@ import pandas as pd
 
 if arguments['--txt'] == True:
     os.system(
-        './freeq.py -i %s -o %s/.book_freeq.csv' % (SCRIPT_PATH, arguments['<txtname>'])
+        '%s/freeq.py -i %s -o %s/.book_freeq.csv' % (SCRIPT_PATH, arguments['<txtname>'], SCRIPT_PATH)
     )
 elif arguments['--pdf'] == True:
     from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter

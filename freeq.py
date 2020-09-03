@@ -20,6 +20,8 @@ with open('%s/lemmas.txt'%SCRIPT_PATH) as fin:
             related = line.split('\t')[1]
         except IndexError:
             related = None
+        if not headword.isalpha():
+            continue
         lemmas[headword] = related
 
 
@@ -104,7 +106,7 @@ class WordFinder(object):
                 return headword
         # This should never happen after the removal of words not in valid_words
         # in Book.__init__()
-        return None
+        return word
 
     # TODO
     def find_related(self, headword):
@@ -112,6 +114,8 @@ class WordFinder(object):
 
 
 def is_dirt(word):
+    if word.isalpha():
+        return False
     return word not in valid_words
 
 
@@ -130,6 +134,9 @@ class Book(object):
             content = bookfile.read().lower()
             self.temp_list = re.split(r'\b([a-zA-Z-]+)\b', content)
             self.temp_list = [item for item in self.temp_list if not is_dirt(item)]
+            for l in self.temp_list:
+                if l == "ergodic":
+                    print("found")
             finder = WordFinder()
             self.temp_list = [finder.find_headword(item) for item in self.temp_list]
 
